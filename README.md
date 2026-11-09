@@ -114,7 +114,6 @@ These are observed behavior on one phone. Explanations marked *(interpretation)*
 - **"Erase background" stays grayed out** in the AOD wallpaper settings.
 - **Reinstalling re-forces `aod_mode=1` once**, because the marker file lives inside the module folder. A planned fix moves it out.
 - **`AOD_ITEM=aodversion=7` is a guess.** It was added so AODService creates its settings table. The correct value is unverified.
-- A 3×1 widget appears in AOD and its source is unknown.
 
 ## Help wanted
 
