@@ -15,7 +15,7 @@ Dimlight overlays Samsung's own AODService on the stock system and fixes the con
 | Device | Galaxy A17 5G (SM-A176B) |
 | Android / UI | Android 17, One UI 9 |
 | Firmware | `A176BXXU8DZJ5` |
-| Root | KernelSU with the `meta-overlayfsx` metamodule |
+| Root | KernelSU with the [`meta-overlayfsx`](https://github.com/RipperHybrid/Meta-Overlayfsx) metamodule |
 | Module version | `8.9.66.1-r8` (versionCode `896601006`) |
 
 Other Samsung phone models are untested, and the outcome is unexpected. Proceed with caution. Note that the installer's model check (in `customize.sh`) currently refuses anything that isn't `SM-A176*`, so you would have to edit it out first.
@@ -37,7 +37,7 @@ Other Samsung phone models are untested, and the outcome is unexpected. Proceed 
 ## Requirements
 
 - Galaxy A17 5G (SM-A176B), rooted with KernelSU
-- A metamodule that mounts module files (tested with `meta-overlayfsx`)
+- A metamodule that mounts module files (tested with [`meta-overlayfsx`](https://github.com/RipperHybrid/Meta-Overlayfsx))
 - adb (optional, for logs and rollback)
 - AOD set to **Show always** in the AOD settings (see [Known issues](#known-issues))
 
@@ -50,7 +50,7 @@ The completed, ready-to-flash module zip (`DimLight V1.1.zip`, release **v1.1 be
 1. Flash the zip in KernelSU Manager.
 2. Do a **full reboot** (not a soft reboot), so the module files get mounted.
 3. Make sure no older AODService module is installed alongside this one. The module id is unchanged between revisions, so a new flash updates in place.
-4. Do not use this together with the GueRapii AODFullScreen-Enabler. Both overlay `floating_feature.xml` and will conflict.
+4. Do not use this together with the [GueRapii AODFullScreen-Enabler](https://github.com/GueRapii/AODFullScreen-Enabler). Both overlay `floating_feature.xml` and will conflict.
 5. Open **Settings > Lock screen > Always On Display** and choose **Show always**.
 
 ## Rolling back
