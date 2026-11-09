@@ -82,7 +82,6 @@ Delete the file and reboot to go back.
   ```
 
   The plugin loads and the clock data is read (`apply lock clock type 2`), but nothing renders while AOD is considered disabled. The cause is still being worked out. Likely candidates are a timing issue at boot, the AOD enable setting SystemUI reads, or the `AOD_ITEM` floating-feature value.
-- **A small 3x1 widget shows** while AOD is enabled. Its source isn't identified yet. It may be a FaceWidget or complication widget.
 - **`AOD_ITEM=aodversion=7` is a guess.** It was added so AODService creates its settings table. The correct value is unverified.
 - The baseline settings before testing were `aod_mode=0`, `doze_always_on=0` and `ambient_enabled=1`.
 
