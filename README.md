@@ -43,7 +43,7 @@ Other Samsung phone models are untested, and the outcome is unexpected. Proceed 
 
 ## Download
 
-The completed, ready-to-flash module zip (`DimLight_V1.1_r8.zip`, release **v1.1 beta**) is in the [Releases](../../releases) section. There's nothing to build. It already includes Samsung's AODService 8.9.66.1 APK, the permission XMLs, `service.sh`, and the modified `floating_feature.xml`.
+The completed, ready-to-flash module zip (`DimLight V1.1.zip`, release **v1.1 beta**) is in the [Releases](../../releases) section. There's nothing to build. It already includes Samsung's AODService 8.9.66.1 APK, the permission XMLs, `service.sh`, and the modified `floating_feature.xml`.
 
 ## Installing
 
