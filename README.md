@@ -39,7 +39,7 @@ Other Samsung phone models are untested, and the outcome is unexpected. Proceed 
 
 ## Download
 
-The completed, ready-to-flash module zip is in the [Releases](../../releases) section. There's nothing to build. It already includes Samsung's AODService 8.9.66.1 APK, the permission XMLs, `service.sh`, and the modified `floating_feature.xml`.
+The completed, ready-to-flash module zip (`DimLight_V1.zip`, release **v1.0 beta**) is in the [Releases](../../releases) section. There's nothing to build. It already includes Samsung's AODService 8.9.66.1 APK, the permission XMLs, `service.sh`, and the modified `floating_feature.xml`.
 
 ## Installing
 
@@ -82,6 +82,7 @@ Delete the file and reboot to go back.
   ```
 
   The plugin loads and the clock data is read (`apply lock clock type 2`), but nothing renders while AOD is considered disabled. The cause is still being worked out. Likely candidates are a timing issue at boot, the AOD enable setting SystemUI reads, or the `AOD_ITEM` floating-feature value.
+- **A small 3x1 widget shows** while AOD is enabled. Its source isn't identified yet. It may be a FaceWidget or complication widget.
 - **`AOD_ITEM=aodversion=7` is a guess.** It was added so AODService creates its settings table. The correct value is unverified.
 - The baseline settings before testing were `aod_mode=0`, `doze_always_on=0` and `ambient_enabled=1`.
 
@@ -104,8 +105,11 @@ Samsung's AODService APK and the stock `floating_feature.xml` (which this module
 
 ## Credits
 
-- Based on the AODService module by **Codex** (`AODService_A176B_v2`).
-- Debugging and documentation assisted by Claude (Anthropic).
+Made with love by **Liff** <3
+
+- **Liff**: project owner, device testing and logs.
+- **Codex**: the original AODService module (`AODService_A176B_v2`) this is based on.
+- **Claude** (Anthropic): debugging, module fixes and documentation. Credited as a co-author on commits.
 
 ## Disclaimer
 
