@@ -11,7 +11,6 @@ Dimlight overlays Samsung's own AODService on the stock system and fixes the con
 ## Tested on
 
 | | |
-|---|---|
 | Device | Galaxy A17 5G (SM-A176B) |
 | Android / UI | Android 17, One UI 9 |
 | Firmware | `A176BXXU8DZJ5` |
