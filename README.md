@@ -4,7 +4,7 @@
 
 Dimlight overlays Samsung's own AODService on the stock system and fixes the conflicts that causes, so you get the original AOD with a basic clock and an AOD wallpaper, and no third-party fullscreen AOD app.
 
-> **Status: beta (r8).** The lock screen clock, the AOD settings page, AOD with wallpaper and the clock all work on the tested phone. A few limitations remain (see [Known issues](#known-issues)).
+> **Status: beta (r8.1).** The lock screen clock, the AOD settings page, AOD with wallpaper and the clock all work on the tested phone. A few limitations and bugs remain (see [Known issues](#known-issues)). If a change in the AOD settings page seems to do nothing, see [Applying changes to AOD settings](#applying-changes-to-aod-settings).
 
 ---
 
@@ -16,7 +16,7 @@ Dimlight overlays Samsung's own AODService on the stock system and fixes the con
 | Android / UI | Android 17, One UI 9 |
 | Firmware | `A176BXXU8DZJ5` |
 | Root | KernelSU with the [`meta-overlayfsx`](https://github.com/RipperHybrid/Meta-Overlayfsx) metamodule |
-| Module version | `8.9.66.1-r8` (versionCode `896601006`) |
+| Module version | `8.9.66.1-r8.1` (versionCode `896601007`) |
 
 Other Samsung phone models are untested, and the outcome is unexpected. Proceed with caution. Note that the installer's model check (in `customize.sh`) currently refuses anything that isn't `SM-A176*`, so you would have to edit it out first.
 
@@ -30,20 +30,20 @@ Other Samsung phone models are untested, and the outcome is unexpected. Proceed 
    - `PluginViewCoverImpl`
 
    The AOD plugin (`PluginAODImpl`) stays enabled.
-3. **Fixes the AOD settings crash and enables the AOD wallpaper.** AODService's database code adds its settings table only when the `CLOCKPACK_ITEM` floating feature does not contain `clockpackversion`. On this firmware it does, so the table was skipped and the app crashed on start. The module ships its own copy of `/system/etc/floating_feature.xml` (your stock file plus edits): it adds an `AOD_ITEM` line, removes the `CLOCKPACK_ITEM` line, and sets `SEC_FLOATING_FEATURE_LCD_CONFIG_AOD_FULLSCREEN` to `1`, which turns on the AOD wallpaper.
-4. **Turns AOD on once.** On the first boot after flashing, `service.sh` sets `aod_mode=1`. After that your own setting is left alone.
-5. **Compiles AODService (r8).** About 45 seconds after boot, `service.sh` compiles the AODService package with `speed` if it isn't already. Otherwise the package runs uncompiled (`run-from-apk`) and its plugin loads slower when the screen turns off. This is done once and survives reboots.
+3. **Fixes the AOD settings crash and enables the AOD wallpaper.** AODService's database code adds its settings table only when the `CLOCKPACK_ITEM` floating feature does not contain `clockpackversion`. On this firmware it does, so the table was skipped and the app crashed on start. The module ships its own copy of `/system/etc/floating_feature.xml` (your stock file plus edits): it adds an `AOD_ITEM` line, removes the `CLOCKPACK_ITEM` line, and sets `SEC_FLOATING_FEATURE_LCD_CONFIG_AOD_FULLSCREEN` to `1`, which turns on the AOD wallpaper. Do not add `clockpackversion` back, or the crash returns.
+4. **Turns AOD on once.** On the first boot after the first install, `service.sh` sets `aod_mode=1`. After that your own setting is left alone, even if you re-install or update the module (r8.1).
+5. **Compiles AODService.** About 45 seconds after boot, `service.sh` compiles the AODService package with `speed` if it isn't already. Otherwise the package runs uncompiled (`run-from-apk`) and its plugin loads slower when the screen turns off. This is done once and survives reboots. It is redone after a module update, because the APK is replaced.
+6. **Runs one copy at a time (r8.1).** A lock stops a second copy of `service.sh` from running while the first is still working, for example a manual run during the boot compile.
 
 ## Requirements
 
 - Galaxy A17 5G (SM-A176B), rooted with KernelSU
 - A metamodule that mounts module files (tested with [`meta-overlayfsx`](https://github.com/RipperHybrid/Meta-Overlayfsx))
 - adb (optional, for logs and rollback)
-- AOD set to **Show always** in the AOD settings (see [Known issues](#known-issues))
 
 ## Download
 
-The completed, ready-to-flash module zip (`DimLight V1.1.zip`, release **v1.1 beta**) is in the [Releases](../../releases) section. There's nothing to build. It already includes Samsung's AODService 8.9.66.1 APK, the permission XMLs, `service.sh`, and the modified `floating_feature.xml`.
+The completed, ready-to-flash module zip (`DimLight_V1_1_r8_1.zip`, release **v1.1.1 beta**) is in the [Releases](../../releases) section. There's nothing to build. It already includes Samsung's AODService 8.9.66.1 APK, the permission XMLs, `service.sh`, and the modified `floating_feature.xml`.
 
 ## Installing
 
@@ -51,7 +51,27 @@ The completed, ready-to-flash module zip (`DimLight V1.1.zip`, release **v1.1 be
 2. Do a **full reboot** (not a soft reboot), so the module files get mounted.
 3. Make sure no older AODService module is installed alongside this one. The module id is unchanged between revisions, so a new flash updates in place.
 4. Do not use this together with the [GueRapii AODFullScreen-Enabler](https://github.com/GueRapii/AODFullScreen-Enabler). Both overlay `floating_feature.xml` and will conflict.
-5. Open **Settings > Lock screen > Always On Display** and choose **Show always**.
+5. Open **Settings > Lock screen > Always On Display** and set it up. If a change doesn't seem to apply, restart SystemUI (see [Known issues](#known-issues)).
+
+**Updating from r8 or earlier:** the first flash of r8.1 sets `aod_mode=1` once more, because the old marker was stored in the module folder and is lost on update. If you don't want that, create the file `no_force_aod` (see [Options](#options)) after flashing and before rebooting. Later updates won't repeat it.
+
+## Applying changes to AOD settings
+
+The AOD settings page can show a new value that the system does not use yet. Switching AOD on or off, the display mode and the wallpaper toggle may only apply after **SystemUI restarts**. Either soft restart the phone, or restart SystemUI as root.
+
+Windows (`cmd` or PowerShell):
+
+```
+adb shell "su -c 'for p in $(pidof com.android.systemui); do kill $p; done'"
+```
+
+Linux or macOS (the `$` is escaped so your own shell doesn't run `pidof`):
+
+```
+adb shell "su -c 'for p in \$(pidof com.android.systemui); do kill $p; done'"
+```
+
+The screen may blink briefly. This is a workaround, and the underlying cause is not yet confirmed (see [Known issues](#known-issues)).
 
 ## Rolling back
 
@@ -61,7 +81,9 @@ Disable the module in KernelSU Manager and reboot, or from a shell:
 adb shell "su -c 'touch /data/adb/modules/aodservice_a176b_v2/disable'"
 ```
 
-Then do a full reboot. This turns off all of the module's changes.
+Then do a full reboot. This turns off all of the module's changes. Removing the module also deletes its log and its saved state (`/data/adb/aodservice_a176b`), so a later fresh install switches AOD on once again.
+
+The compile step needs no undoing: the compiled code belongs to the AODService package, which goes away with the module. (`cmd package compile --reset` did not clear the compiled state in testing; `cmd package compile -m verify -f com.samsung.android.app.aodservice` does.)
 
 ## Options
 
@@ -69,7 +91,7 @@ Create an empty file in `/data/adb/modules/aodservice_a176b_v2/` and reboot to c
 
 | File | Effect |
 |---|---|
-| `no_force_aod` | Don't set `aod_mode=1` on first boot |
+| `no_force_aod` | Don't set `aod_mode=1` |
 | `no_compile` | Skip the `speed` compile of AODService |
 | `allow_lock_plugins` | Test switch: re-enable AODService's four lock-screen plugins (the lock clock is expected to vanish again) |
 
@@ -81,7 +103,7 @@ adb shell "su -c 'touch /data/adb/modules/aodservice_a176b_v2/no_compile'"
 
 ## Logs
 
-- `/data/local/tmp/aodservice_a176b.log` (and `.log.prev` from the previous boot): what `service.sh` did, the compile result, and which plugins SystemUI can still discover.
+- `/data/local/tmp/aodservice_a176b.log` (and `.log.prev` from the previous boot): what `service.sh` did, the compile result, and which plugins SystemUI can still discover. The first lines show the script version (`service.sh r8.1 start`).
 
   ```
   adb shell "su -c 'cat /data/local/tmp/aodservice_a176b.log'"
@@ -108,26 +130,50 @@ These are observed behavior on one phone. Explanations marked *(interpretation)*
 
   The plugin loaded and the clock data was read, but nothing rendered. `aod_mode` was `0` at the time. The module now sets it to `1` once (r7 and later), which is the intended fix. On one boot `aod_mode` and `aod_show_lockscreen_wallpaper` were `0` again before the script ran, and the cause is unknown (a manual change, power saving mode, or something else).
 - **The clock does not move for burn-in protection.** Only the charging info moves, about 2×3 px per minute. The clock stayed at the same position in 96 log readings. *(Interpretation: in the fullscreen layout the AOD draws the lock screen clock, which has no self-move.)* No setting changes this, and it does not look fixable from a module.
-- **Show always is required.** In **Auto** mode the burn-in monitor logs `start skipped by not AOD_DISPLAY_MODE_SHOW_ALWAYS` and doesn't start.
-- **Black gap of about 0.8 s when pressing the power button.** Panel off, DozeService start, AOD plugin load, AOD UI build, panel in doze. About 220 ms of the system part and about 200 ms of the panel switch can't be changed by a module. The r8 compile step shortened plugin loading in one sample (about 0.67 s total). That is a single measurement, not a guarantee.
+- **Changes in the AOD settings page don't apply until SystemUI restarts.** The page shows the new value, but the system keeps using the old one. This affects switching AOD on or off, the display mode and, very likely, the AOD wallpaper toggle. Confirmed by two users. **Workaround:** soft restart the phone, or force-stop SystemUI as root:
+
+  ```
+  adb shell "su -c 'for p in $(pidof com.android.systemui); do kill $p; done'"
+  ```
+
+  *(Interpretation: the settings page writes a value that SystemUI only reads when it starts.)* The cause is not yet confirmed.
+- **Black gap of about 0.8 s when pressing the power button.** Panel off, DozeService start, AOD plugin load, AOD UI build, panel in doze. About 220 ms of the system part and about 200 ms of the panel switch can't be changed by a module. The compile step shortened plugin loading in one sample (about 0.67 s total). That is a single measurement, not a guarantee.
 - **AOD to lock screen: the clock and "now bar" don't animate**, only the wallpaper does. Same in r7 and r8. *(Interpretation: SystemUI behavior.)*
 - **"Erase background" stays grayed out** in the AOD wallpaper settings.
-- **Reinstalling re-forces `aod_mode=1` once**, because the marker file lives inside the module folder. A planned fix moves it out.
-- **`AOD_ITEM=aodversion=7` is a guess.** It was added so AODService creates its settings table. The correct value is unverified.
+- **`AOD_ITEM=aodversion=7`: the key is confirmed, the value is not.** AODService reads the `aodversion` key (it is in the APK). Adding the `AOD_ITEM` line makes the settings table get created and stops the settings crash. Nothing shows what the number 7 means or whether other values would behave differently, and no other value was tested.
+
+**Reported, not yet investigated or confirmed:**
+
+- With AOD switched off completely, the AOD is reported to still show for about a minute before the screen turns off. *(Likely the SystemUI restart issue above; not retested.)*
+- After the AOD wallpaper has been enabled once and then disabled, the AOD is reported to never go fully black again. *(Likely the same SystemUI restart issue; not retested.)*
+- Notifications are reported not to appear on the AOD. Not investigated yet.
 
 ## Help wanted
 
-If you can test, the most useful information is:
+If you can test, the most useful information is a before and after settings dump around the problem you see. Take one before you change an AOD setting:
 
 ```
-adb shell "settings list system" > settings_system.txt
-adb shell "settings list secure" > settings_secure.txt
+adb shell "settings list system" > before_system.txt
+adb shell "settings list secure" > before_secure.txt
 ```
 
-plus whether the AOD settings page has an on/off switch, and whether it's on. Logs from a boot where the AOD clock is missing, and from one where it works, are especially helpful. Also useful:
+Change the setting in the AOD settings page, then take another:
 
-- The `AOD_ITEM` lines from `/system/etc/floating_feature.xml` on a Samsung phone that ships native AOD, to verify the `aodversion=7` guess.
-- Ideas for moving the AOD clock for burn-in, or for shortening the black gap on screen-off.
+```
+adb shell "settings list system" > after_system.txt
+adb shell "settings list secure" > after_secure.txt
+```
+
+Attach all four files. They show which values the settings page actually changes. Please also say:
+
+- Which module version you have (the first lines of `/data/local/tmp/aodservice_a176b.log`; `service.sh r8.1 start` means r8.1).
+- Whether the problem goes away after restarting SystemUI.
+- Whether notifications show on the AOD after a restart, and whether the AOD mode makes a difference.
+
+Logs from a boot where the AOD clock is missing, and from one where it works, are also helpful. Also useful:
+
+- The `AOD_ITEM` lines from `/system/etc/floating_feature.xml` on a Samsung phone that ships native AOD, to check whether the value 7 is the one Samsung uses.
+- Ideas for moving the AOD clock for burn-in, for making the clock and now bar animate on wake, or for shortening the black gap on screen-off.
 
 ## Licensing
 
